@@ -1,0 +1,80 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\DataTransferObjects\{{ model }}Object;
+use App\Interfaces\Repositories\{{ class }}Interface;
+use App\Repositories\Base\BaseRepository;
+use {{ namespacedModel }};
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class {{ class }} extends BaseRepository implements {{ class }}Interface
+{
+    /**
+     * Instantiate a new {{ class }} instance.
+     */
+    public function __construct()
+    {
+        $this->setAllowableSearch([
+            //
+        ]);
+
+        $this->setAllowableSort([
+            //
+        ]);
+    }
+
+    /**
+     * Datatable query for {{ model }}.
+     */
+    public function datatable(Request $request): LengthAwarePaginator
+    {
+        return {{ model }}::query()
+            ->when($request->search, function ($query, $search) {
+                $this->getAllowableSearchQuery($query, $search);
+            })
+            ->orderBy($this->getSortColumn(), $this->getSortDirection())
+            ->paginate($request->per_page ?? config('app.default_paginator'));
+    }
+
+    /**
+     * Create a new {{ model }}.
+     */
+    public function create({{ model }}Object $data): {{ model }}
+    {
+        $data =  {{ model }}::create($data->toArray());
+
+        return $data;
+    }
+
+    /**
+     * Find a {{ model }} by id.
+     */
+    public function show(string $id): {{ model }}
+    {
+        $data =  {{ model }}::with($this->getAllowableFilter())->findOrFail($id);
+
+        return $data;
+    }
+
+    /**
+     * Update a {{ model }},
+     */
+    public function update({{ model }}Object $data, string $id): {{ model }}
+    {
+        $model = {{ model }}::findOrFail($id);
+        $model->update($data->toArray());
+
+        return $model;
+    }
+
+    /**
+     * Delete a {{ model }},
+     */
+    public function delete(string $id): void
+    {
+        $data = {{ model }}::findOrFail($id);
+        $data->delete();
+    }
+}
